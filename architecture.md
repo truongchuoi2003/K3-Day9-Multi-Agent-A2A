@@ -51,16 +51,16 @@ input/EC_xxx.json
 
 ## 3. Vai trò, quyền truy cập và đầu ra
 
-| Thành phần | Chỉ đọc | Không được làm | Handoff bắt buộc |
-| --- | --- | --- | --- |
-| **Coordinator Agent** | Input case, mọi payload agent, trạng thái chạy | Không tự thay facts CSV; không quyết định policy khi thiếu handoff | `case_context`, payload tổng hợp, yêu cầu repair nếu verifier lỗi |
-| **Order & Seller Agent** | `orders`, `order_items`, `sellers` | Không tính refund hay kết luận giao trễ logistics | order status, item/seller IDs, shipping limits, item và freight totals |
-| **Payment Agent** | `order_payments`, item/freight totals từ Order & Seller | Không kết luận seller/logistics | payment rows, payment total, số payment rows, reconciliation với item + freight |
-| **Delivery Agent** | `orders`, shipping limits theo item từ Order & Seller | Không tự xác định refund | delivered-carrier/customer/estimated timestamps, trạng thái giao trễ, seller handoff theo từng seller |
-| **Policy Agent** | Payload đã xác minh của 3 agent domain | Không đọc/đoán thêm dữ liệu ngoài payload; không bỏ qua thứ tự ưu tiên | assessment, root cause, responsible parties, resolution tài chính và actions |
-| **Evidence Agent** | Payload đã xác minh, policy decision | Không sinh ID không có trong facts hoặc vượt format | evidence IDs và affected entities đã chuẩn hóa |
-| **Verifier Agent** | Candidate output và facts đã xác minh | Không “tự sửa im lặng” kết luận policy | `valid` hoặc danh sách lỗi theo field |
-| **Writer** | Output đã `valid` | Không ghi candidate chưa qua verifier | JSON UTF-8, một file đúng tên case |
+| Thành phần                   | Chỉ đọc                                                 | Không được làm                                                                   | Handoff bắt buộc                                                                                        |
+| ------------------------------ | ---------------------------------------------------------- | ------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| **Coordinator Agent**    | Input case, mọi payload agent, trạng thái chạy         | Không tự thay facts CSV; không quyết định policy khi thiếu handoff             | `case_context`, payload tổng hợp, yêu cầu repair nếu verifier lỗi                                 |
+| **Order & Seller Agent** | `orders`, `order_items`, `sellers`                   | Không tính refund hay kết luận giao trễ logistics                                | order status, item/seller IDs, shipping limits, item và freight totals                                   |
+| **Payment Agent**        | `order_payments`, item/freight totals từ Order & Seller | Không kết luận seller/logistics                                                    | payment rows, payment total, số payment rows, reconciliation với item + freight                         |
+| **Delivery Agent**       | `orders`, shipping limits theo item từ Order & Seller   | Không tự xác định refund                                                         | delivered-carrier/customer/estimated timestamps, trạng thái giao trễ, seller handoff theo từng seller |
+| **Policy Agent**         | Payload đã xác minh của 3 agent domain                 | Không đọc/đoán thêm dữ liệu ngoài payload; không bỏ qua thứ tự ưu tiên | assessment, root cause, responsible parties, resolution tài chính và actions                           |
+| **Evidence Agent**       | Payload đã xác minh, policy decision                    | Không sinh ID không có trong facts hoặc vượt format                             | evidence IDs và affected entities đã chuẩn hóa                                                       |
+| **Verifier Agent**       | Candidate output và facts đã xác minh                  | Không “tự sửa im lặng” kết luận policy                                        | `valid` hoặc danh sách lỗi theo field                                                                |
+| **Writer**               | Output đã`valid`                                       | Không ghi candidate chưa qua verifier                                               | JSON UTF-8, một file đúng tên case                                                                    |
 
 Chỉ các file CSV là nguồn dữ liệu nghiệp vụ. `customers`, `products`, `reviews`, `geolocation` không cần trong policy hiện tại; chúng không được dùng để thay đổi kết luận nếu không có yêu cầu mới.
 
@@ -139,14 +139,14 @@ Nếu không tìm thấy `order_id` trong `orders`, Coordinator tạo trace lỗ
 
 Policy Agent áp dụng quy tắc theo đúng thứ tự sau; rule đầu tiên khớp là quyết định cuối cùng:
 
-| Ưu tiên | Điều kiện | `primary_issue` | Root cause | Trách nhiệm | Refund / action |
-| ---: | --- | --- | --- | --- | --- |
-| 1 | `order_status = canceled` và `payment_total_brl > 0` | `canceled_order_paid` | `ORDER_CANCELED_AFTER_PAYMENT` | `platform: OLIST_PLATFORM` | toàn bộ payment / `issue_full_refund` |
-| 2 | `order_status = unavailable` và `payment_total_brl > 0` | `unavailable_order_paid` | `ORDER_UNAVAILABLE_AFTER_PAYMENT` | `platform: OLIST_PLATFORM` | toàn bộ payment / `issue_full_refund` |
-| 3 | giao trễ và có seller `handoff_after_limit = true` | `late_delivery_seller` | `SELLER_HANDOFF_AFTER_LIMIT` | seller vi phạm | toàn bộ freight / `refund_freight` |
-| 4 | giao trễ và seller không bàn giao muộn | `late_delivery_logistics` | `CARRIER_DELIVERED_AFTER_ESTIMATE` | `logistics_provider: LOGISTICS_PROVIDER` | toàn bộ freight / `refund_freight` |
-| 5 | ít nhất 2 payment rows và payment reconciled | `valid_split_payment` | `MULTIPLE_PAYMENTS_RECONCILED` | không có | 0 / `explain_valid_split_payment` |
-| 6 | không giao trễ và payment reconciled | `unsupported_late_claim` | `DELIVERY_WITHIN_ESTIMATE` | không có | 0 / `reject_late_refund` |
+| Ưu tiên | Điều kiện                                                 | `primary_issue`           | Root cause                           | Trách nhiệm                              | Refund / action                          |
+| --------: | ------------------------------------------------------------ | --------------------------- | ------------------------------------ | ------------------------------------------ | ---------------------------------------- |
+|         1 | `order_status = canceled` và `payment_total_brl > 0`    | `canceled_order_paid`     | `ORDER_CANCELED_AFTER_PAYMENT`     | `platform: OLIST_PLATFORM`               | toàn bộ payment /`issue_full_refund` |
+|         2 | `order_status = unavailable` và `payment_total_brl > 0` | `unavailable_order_paid`  | `ORDER_UNAVAILABLE_AFTER_PAYMENT`  | `platform: OLIST_PLATFORM`               | toàn bộ payment /`issue_full_refund` |
+|         3 | giao trễ và có seller`handoff_after_limit = true`       | `late_delivery_seller`    | `SELLER_HANDOFF_AFTER_LIMIT`       | seller vi phạm                            | toàn bộ freight /`refund_freight`    |
+|         4 | giao trễ và seller không bàn giao muộn                  | `late_delivery_logistics` | `CARRIER_DELIVERED_AFTER_ESTIMATE` | `logistics_provider: LOGISTICS_PROVIDER` | toàn bộ freight /`refund_freight`    |
+|         5 | ít nhất 2 payment rows và payment reconciled              | `valid_split_payment`     | `MULTIPLE_PAYMENTS_RECONCILED`     | không có                                 | 0 /`explain_valid_split_payment`       |
+|         6 | không giao trễ và payment reconciled                      | `unsupported_late_claim`  | `DELIVERY_WITHIN_ESTIMATE`         | không có                                 | 0 /`reject_late_refund`                |
 
 Case ở ưu tiên 1–4 có `case_status: "action_required"`; ưu tiên 5–6 có `case_status: "no_action"`. Không thêm cause hoặc responsible party không phục vụ rule đã chọn.
 
