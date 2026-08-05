@@ -1,0 +1,6 @@
+{
+  "model": "TBD",
+  "parameter_size": "<=10B",
+  "framework": "Python + pandas",
+  "runtime": "local"
+}
