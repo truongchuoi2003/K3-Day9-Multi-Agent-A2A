@@ -1,0 +1,6 @@
+{
+  "model": "gpt-4o-mini",
+  "parameter_size": "provider-managed (instructor-required model)",
+  "framework": "Python + pandas + OpenAI Chat Completions API",
+  "runtime": "local"
+}
