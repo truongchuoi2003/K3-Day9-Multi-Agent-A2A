@@ -15,6 +15,7 @@ from .agents.policy import PolicyAgent
 from .agents.verifier import VerifierAgent
 from .config import MODEL_NAME
 from .data_loader import DataLoader
+from .llm import OpenAIHandoffClient
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -52,12 +53,14 @@ def run(args: argparse.Namespace) -> int:
         raise FileNotFoundError(f"No EC_*.json files found in {args.input_dir}")
 
     loader = DataLoader(args.data_dir)
+    llm_client = OpenAIHandoffClient.from_environment()
     coordinator = CoordinatorAgent(
         order_seller_agent=OrderSellerAgent(loader),
         payment_agent=PaymentAgent(loader),
         delivery_agent=DeliveryAgent(),
         policy_agent=PolicyAgent(),
         verifier_agent=VerifierAgent(loader),
+        llm_client=llm_client,
         output_dir=args.output_dir,
     )
 

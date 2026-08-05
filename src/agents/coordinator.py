@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Any, Protocol
 
 from ..evidence import EvidenceBuilder
+from ..llm import OpenAIHandoffClient
 from ..schemas import CaseOutput, DeliveryResult, OrderSellerResult, PaymentResult, PolicyResult
 from .delivery import DeliveryAgent
 from .order_seller import OrderSellerAgent
@@ -41,6 +42,7 @@ class CoordinatorAgent:
         delivery_agent: DeliveryAgent,
         policy_agent: PolicyAgent,
         verifier_agent: OutputVerifier,
+        llm_client: OpenAIHandoffClient,
         output_dir: str | Path = "output",
     ) -> None:
         self.order_seller_agent = order_seller_agent
@@ -48,6 +50,7 @@ class CoordinatorAgent:
         self.delivery_agent = delivery_agent
         self.policy_agent = policy_agent
         self.verifier_agent = verifier_agent
+        self.llm_client = llm_client
         self.output_dir = Path(output_dir)
         self.evidence_builder = EvidenceBuilder()
 
@@ -67,6 +70,15 @@ class CoordinatorAgent:
         payment_result = self.payment_agent.analyze(order_id, order_result["items"])
         delivery_result = self.delivery_agent.analyze(order_result)
         policy_result = self.policy_agent.decide(order_result, payment_result, delivery_result)
+        model_audit = self.llm_client.audit_case(
+            case_id,
+            {
+                "order": order_result,
+                "payment": payment_result,
+                "delivery": delivery_result,
+                "policy": policy_result,
+            },
+        )
 
         draft = self._build_output(
             case_id=case_id,
@@ -88,6 +100,7 @@ class CoordinatorAgent:
             "payment": payment_result,
             "delivery": delivery_result,
             "policy": policy_result,
+            "gpt4o_mini_audit": model_audit,
             "verifier": {"status": "passed", "errors": []},
         }
 

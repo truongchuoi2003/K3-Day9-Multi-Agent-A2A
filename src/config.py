@@ -1,10 +1,10 @@
-"""Declared runtime and model configuration for submission compliance."""
+"""Declared runtime and model configuration for the submission."""
 
-# This pipeline makes deterministic EC_POLICY_V1 decisions and does not call an
-# LLM provider. Therefore no agent uses a model with parameters over 10B.
-MODEL_NAME = "rule-based / no LLM"
-MODEL_PARAMETER_SIZE = "N/A"
-FRAMEWORK = "Python + pandas"
+# Required by the instructor. The API key is read only at runtime from .env or
+# OPENAI_API_KEY and is never stored in source, trace, metadata, or output.
+MODEL_NAME = "gpt-4o-mini"
+MODEL_PARAMETER_SIZE = "provider-managed (instructor-required model)"
+FRAMEWORK = "Python + pandas + OpenAI Chat Completions API"
 RUNTIME = "local"
-USES_LLM = False
-MAX_ALLOWED_MODEL_PARAMETERS = 10_000_000_000
+USES_LLM = True
+OPENAI_API_URL = "https://api.openai.com/v1/chat/completions"
