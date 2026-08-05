@@ -1,0 +1,5 @@
+{
+  "case_id": "EC_018",
+  "status": "rejected",
+  "reason": "orders_csv_missing"
+}
