@@ -1,6 +1,6 @@
 {
-  "model": "TBD",
-  "parameter_size": "<=10B",
+  "model": "rule-based / no LLM",
+  "parameter_size": "N/A",
   "framework": "Python + pandas",
   "runtime": "local"
 }

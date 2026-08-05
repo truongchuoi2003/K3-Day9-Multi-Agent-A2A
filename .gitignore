@@ -1,0 +1,11 @@
+# Secrets and local environments
+.env
+.env.*
+.venv/
+
+# Python bytecode
+__pycache__/
+*.py[cod]
+
+# Submission artifact; generated locally from output/ when needed.
+output.zip
