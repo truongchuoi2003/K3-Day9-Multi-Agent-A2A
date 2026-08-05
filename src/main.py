@@ -13,6 +13,7 @@ from .agents.order_seller import OrderSellerAgent
 from .agents.payment import PaymentAgent
 from .agents.policy import PolicyAgent
 from .agents.verifier import VerifierAgent
+from .config import MODEL_NAME
 from .data_loader import DataLoader
 
 
@@ -74,6 +75,7 @@ def run(args: argparse.Namespace) -> int:
                 trace_record = {
                     "case_id": case_id,
                     "claimed_order_id": case["customer_request"]["claimed_order_id"],
+                    "model": MODEL_NAME,
                     "agent_handoffs": handoffs,
                     "primary_issue": output["assessment"]["primary_issue"],
                     "verification": "passed",
